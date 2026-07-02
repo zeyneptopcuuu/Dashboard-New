@@ -28,14 +28,15 @@ jobs:
           JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
         run: python scripts/generate_report.py
 
-      - name: Degisiklik varsa commit + push et
+      - name: Son kontrol zaman damgasini guncelle
+        run: |
+          mkdir -p .github
+          echo "Son otomatik kontrol: $(date -u '+%Y-%m-%d %H:%M UTC')" > .github/last-check.txt
+
+      - name: Her zaman commit + push et (repo aktif kalsin, cron devre disi kalmasin)
         run: |
           git config user.name "sprint-dashboard-bot"
           git config user.email "actions@github.com"
-          git add index.html
-          if git diff --cached --quiet; then
-            echo "Degisiklik yok, commit atlaniyor."
-          else
-            git commit -m "chore: sprint dashboard haftalik guncelleme [skip ci]"
-            git push
-          fi
+          git add index.html .github/last-check.txt
+          git commit -m "chore: sprint dashboard kontrolu [skip ci]" --allow-empty
+          git push

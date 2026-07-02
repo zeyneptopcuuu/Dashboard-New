@@ -2,7 +2,8 @@ name: Sprint Dashboard - Haftalik Guncelleme
 
 on:
   schedule:
-    - cron: "0 11 * * 3"
+    - cron: "0 10 * * 2"   # Sali 13:00 (TR saati)
+    - cron: "0 11 * * 3"   # Carsamba 14:00 (TR saati)
   workflow_dispatch: {}
 
 permissions:

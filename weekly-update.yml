@@ -1,0 +1,42 @@
+name: Sprint Dashboard - Haftalik Guncelleme
+
+on:
+  schedule:
+    # Her Pazartesi 06:00 UTC (TR saatiyle yaz saati uygulamasina gore 09:00/10:00 civari)
+    - cron: "0 6 * * 1"
+  workflow_dispatch: {}   # Actions sekmesinden elle de calistirilabilir
+
+permissions:
+  contents: write
+
+jobs:
+  update-dashboard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repo'yu al
+        uses: actions/checkout@v4
+
+      - name: Python kur
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Raporu Jira'dan uret
+        env:
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_API_TOKEN: ${{ secrets.JIRA_API_TOKEN }}
+          JIRA_PROJECT_KEY: ${{ secrets.JIRA_PROJECT_KEY }}
+        run: python scripts/generate_report.py
+
+      - name: Degisiklik varsa commit + push et
+        run: |
+          git config user.name "sprint-dashboard-bot"
+          git config user.email "actions@github.com"
+          git add index.html
+          if git diff --cached --quiet; then
+            echo "Degisiklik yok, commit atlaniyor."
+          else
+            git commit -m "chore: sprint dashboard haftalik guncelleme [skip ci]"
+            git push
+          fi
